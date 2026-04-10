@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  storefront:
+    build: ./Storefront
+    ports:
+      - "8080:8080"
+  admin:
+    build: ./Admin
+    ports:
+      - "8081:8081"
