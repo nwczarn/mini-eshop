@@ -1,9 +1,0 @@
-@Storefront_HostAddress = http://localhost:8080
-
-### Root endpoint
-GET {{Storefront_HostAddress}}/
-Accept: application/json
-
-### Get products from Admin via Storefront proxy
-GET {{Storefront_HostAddress}}/admin-products
-Accept: application/json

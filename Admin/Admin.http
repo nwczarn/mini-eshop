@@ -1,9 +1,0 @@
-@Admin_HostAddress = http://localhost:8081
-
-### Root endpoint
-GET {{Admin_HostAddress}}/
-Accept: application/json
-
-### Get products
-GET {{Admin_HostAddress}}/products
-Accept: application/json
