@@ -1,0 +1,22 @@
+[
+  {
+    "Name": "Docker Compose",
+    "Projects": [
+      {
+        "Path": "src\\Admin\\Admin.csproj",
+        "Action": "StartWithoutDebugging",
+        "DebugTarget": "Container (Dockerfile)"
+      },
+      {
+        "Path": "src\\AIService\\AIService.csproj",
+        "Action": "StartWithoutDebugging",
+        "DebugTarget": "Container (Dockerfile)"
+      },
+      {
+        "Path": "src\\Storefront\\Storefront.csproj",
+        "Action": "StartWithoutDebugging",
+        "DebugTarget": "Container (Dockerfile)"
+      }
+    ]
+  }
+]

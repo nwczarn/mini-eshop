@@ -1,0 +1,37 @@
+@AIService_HostAddress = http://localhost:8090
+
+### Health check
+GET {{AIService_HostAddress}}/health
+Accept: application/json
+
+###
+
+### Generate Endpoint
+POST {{AIService_HostAddress}}/generate-endpoint
+Content-Type: application/json
+
+{
+  "specName": "example-spec.txt"
+}
+
+###
+
+### Analyze Error
+POST {{AIService_HostAddress}}/analyze-error
+Content-Type: application/json
+
+{
+  "error": "NullReferenceException: Object reference not set to an instance of an object"
+}
+
+###
+
+### Swagger UI
+GET {{AIService_HostAddress}}/swagger
+Accept: text/html
+
+###
+
+### Swagger JSON
+GET {{AIService_HostAddress}}/swagger/v1/swagger.json
+Accept: application/json

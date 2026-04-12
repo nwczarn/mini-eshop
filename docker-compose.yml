@@ -1,11 +1,15 @@
-version: '3.9'
-
 services:
   storefront:
-    build: ./Storefront
+    build: ./src/Storefront
     ports:
       - "8080:8080"
+
   admin:
-    build: ./Admin
+    build: ./src/Admin
     ports:
       - "8081:8081"
+
+  aiservice:
+    build: ./src/AIService
+    ports:
+      - "8090:8090"

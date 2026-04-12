@@ -1,0 +1,17 @@
+@Storefront_HostAddress = http://localhost:8080
+
+### Root endpoint
+GET {{Storefront_HostAddress}}/
+Accept: application/json
+
+###
+
+### Swagger UI
+GET {{Storefront_HostAddress}}/swagger
+Accept: text/html
+
+###
+
+### Swagger JSON
+GET {{Storefront_HostAddress}}/swagger/v1/swagger.json
+Accept: application/json

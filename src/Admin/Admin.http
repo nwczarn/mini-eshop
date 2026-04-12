@@ -1,0 +1,17 @@
+@Admin_HostAddress = http://localhost:8081
+
+### Health check
+GET {{Admin_HostAddress}}/admin/health
+Accept: application/json
+
+###
+
+### Swagger UI
+GET {{Admin_HostAddress}}/swagger
+Accept: text/html
+
+###
+
+### Swagger JSON
+GET {{Admin_HostAddress}}/swagger/v1/swagger.json
+Accept: application/json
