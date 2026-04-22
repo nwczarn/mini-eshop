@@ -36,3 +36,19 @@ stages:
       inputs:
         pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'drop'
+        
+- stage: Deploy_DEV
+  dependsOn: Build
+  jobs:
+  - deployment: DeployWeb
+    environment: 'dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'AZURE-SERVICE-CONNECTION'
+              appName: 'minieshop-storefront-dev'
+              package: '$(Pipeline.Workspace)/drop'
