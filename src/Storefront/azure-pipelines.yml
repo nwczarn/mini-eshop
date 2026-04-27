@@ -184,7 +184,7 @@ stages:
 
           - script: |
               echo "Smoke test: checking service health"
-              curl -f https://storefront-staging.azurewebsites.net/health
+              curl -f https://minieshop-storefront-staging.azurewebsites.net/health
             displayName: Smoke test
 
 
