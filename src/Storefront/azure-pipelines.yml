@@ -62,11 +62,35 @@ stages:
 
 
 # =========================
+# INFRA - DEV
+# =========================
+- stage: Infra_Dev
+  displayName: Deploy Infrastructure (DEV)
+  dependsOn: Build
+
+  jobs:
+  - job: DeployInfraDev
+    steps:
+
+    - task: AzureCLI@2
+      displayName: Deploy DEV Infrastructure (Bicep)
+      inputs:
+        azureSubscription: 'AZURE-SERVICE-CONNECTION'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az deployment group create \
+            --resource-group minieshop-dev-rg \
+            --template-file src/Storefront/infra/bicep/storefront.bicep \
+            --parameters @src/Storefront/infra/bicep/dev.parameters.json
+
+
+# =========================
 # DEV DEPLOYMENT
 # =========================
 - stage: Dev
   displayName: Deploy to DEV
-  dependsOn: Build
+  dependsOn: Infra_Dev
 
   jobs:
   - deployment: DeployDev
@@ -101,11 +125,35 @@ stages:
 
 
 # =========================
+# INFRA - STAGING
+# =========================
+- stage: Infra_Staging
+  displayName: Deploy Infrastructure (STAGING)
+  dependsOn: Dev
+
+  jobs:
+  - job: DeployInfraStaging
+    steps:
+
+    - task: AzureCLI@2
+      displayName: Deploy STAGING Infrastructure (Bicep)
+      inputs:
+        azureSubscription: 'AZURE-SERVICE-CONNECTION'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az deployment group create \
+            --resource-group minieshop-staging-rg \
+            --template-file src/Storefront/infra/bicep/storefront.bicep \
+            --parameters @src/Storefront/infra/bicep/staging.parameters.json
+
+
+# =========================
 # STAGING DEPLOYMENT
 # =========================
 - stage: Staging
   displayName: Deploy to STAGING
-  dependsOn: Dev
+  dependsOn: Infra_Staging
 
   jobs:
   - deployment: DeployStaging
@@ -141,11 +189,35 @@ stages:
 
 
 # =========================
+# INFRA - PRODUCTION
+# =========================
+- stage: Infra_Production
+  displayName: Deploy Infrastructure (PRODUCTION)
+  dependsOn: Staging
+
+  jobs:
+  - job: DeployInfraProd
+    steps:
+
+    - task: AzureCLI@2
+      displayName: Deploy PRODUCTION Infrastructure (Bicep)
+      inputs:
+        azureSubscription: 'AZURE-SERVICE-CONNECTION'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az deployment group create \
+            --resource-group minieshop-prod-rg \
+            --template-file src/Storefront/infra/bicep/storefront.bicep \
+            --parameters @src/Storefront/infra/bicep/prod.parameters.json
+
+
+# =========================
 # PRODUCTION DEPLOYMENT
 # =========================
 - stage: Production
   displayName: Deploy to PRODUCTION
-  dependsOn: Staging
+  dependsOn: Infra_Production
 
   jobs:
   - deployment: DeployProd
