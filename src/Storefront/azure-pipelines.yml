@@ -4,7 +4,7 @@ trigger:
       - dev
   paths:
     include:
-      - src/storefront/*   # only runs when Storefront changes
+      - src/Storefront/*   # only runs when Storefront changes
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -25,61 +25,64 @@ stages:
 
     steps:
 
-    # -----------------------------------
-    # Install .NET SDK (required for build)
-    # -----------------------------------
     - task: UseDotNet@2
       inputs:
         packageType: 'sdk'
         version: '8.x'
       displayName: Install .NET SDK
 
-    # -----------------------------------
-    # Restore dependencies (Storefront only)
-    # -----------------------------------
-    - script: dotnet restore src/storefront/storefront.csproj
+    - script: dotnet restore src/Storefront/Storefront.csproj
       displayName: Restore dependencies
 
-    # -----------------------------------
-    # Build Storefront project only
-    # -----------------------------------
-    - script: dotnet build src/storefront/storefront.csproj --configuration $(buildConfiguration) --no-restore
+    - script: dotnet build src/Storefront/Storefront.csproj --configuration $(buildConfiguration) --no-restore
       displayName: Build project
 
-    # -----------------------------------
-    # Run unit tests (assumed to exist)
-    # -----------------------------------
-    - script: dotnet test src/storefront/storefront.csproj --configuration $(buildConfiguration) --no-build
+    - script: dotnet test src/Storefront/Storefront.csproj --configuration $(buildConfiguration) --no-build
       displayName: Run unit tests
 
-    # -----------------------------------
-    # Publish compiled output to folder
-    # -----------------------------------
     - script: |
-        dotnet publish src/storefront/storefront.csproj \
+        dotnet publish src/Storefront/Storefront.csproj \
           -c $(buildConfiguration) \
-          -o $(Build.ArtifactStagingDirectory)/storefront
+          -o $(Build.ArtifactStagingDirectory)/Storefront
       displayName: Publish application
 
-    # -----------------------------------
-    # Zip published output
-    # -----------------------------------
     - task: ArchiveFiles@2
       inputs:
-        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/storefront'
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/Storefront'
         includeRootFolder: false
         archiveType: zip
-        archiveFile: '$(Build.ArtifactStagingDirectory)/storefront.zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/Storefront.zip'
       displayName: Zip artifact
 
-    # -----------------------------------
-    # Publish artifact for later stages
-    # -----------------------------------
     - task: PublishBuildArtifacts@1
       inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)/storefront.zip'
+        pathToPublish: '$(Build.ArtifactStagingDirectory)/Storefront.zip'
         artifactName: 'drop'
       displayName: Publish artifact
+
+
+# =========================
+# INFRA - DEV
+# =========================
+- stage: Infra_Dev
+  displayName: Deploy Infrastructure (DEV)
+  dependsOn: Build
+
+  jobs:
+  - job: DeployInfraDev
+    steps:
+
+    - task: AzureCLI@2
+      displayName: Deploy DEV Infrastructure (Bicep)
+      inputs:
+        azureSubscription: 'AZURE-SERVICE-CONNECTION'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az deployment group create \
+            --resource-group minieshop-dev-rg \
+            --template-file src/Storefront/infra/bicep/storefront.bicep \
+            --parameters @src/Storefront/infra/bicep/dev.parameters.json
 
 
 # =========================
@@ -87,11 +90,11 @@ stages:
 # =========================
 - stage: Dev
   displayName: Deploy to DEV
-  dependsOn: Build
+  dependsOn: Infra_Dev
 
   jobs:
   - deployment: DeployDev
-    environment: 'storefront-dev'   # configure approvals if needed
+    environment: 'storefront-dev'
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -100,22 +103,9 @@ stages:
         deploy:
           steps:
 
-          # -----------------------------------
-          # Download build artifact
-          # -----------------------------------
           - download: current
             artifact: drop
 
-          # -----------------------------------
-          # Extract artifact
-          # -----------------------------------
-          - script: |
-              unzip $(Pipeline.Workspace)/drop/storefront.zip -d app
-            displayName: Extract artifact
-
-          # -----------------------------------
-          # Deploy using Azure CLI
-          # -----------------------------------
           - task: AzureCLI@2
             displayName: Deploy to Dev
             inputs:
@@ -124,30 +114,50 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 az webapp deploy \
-                  --name storefront-dev \
-                  --resource-group <YOUR-RG> \
-                  --src-path app
+                  --name minieshop-storefront-dev \
+                  --resource-group minieshop-dev-rg \
+                  --src-path $(Pipeline.Workspace)/drop/Storefront.zip \
+                  --type zip
 
-          # -----------------------------------
-          # Integration tests (after deploy)
-          # -----------------------------------
           - script: |
               echo "Running integration tests..."
-              # Replace with real tests later:
-              # dotnet test tests/IntegrationTests
             displayName: Integration tests
 
 
 # =========================
-# STAGING DEPLOYMENT (APPROVAL RECOMMENDED)
+# INFRA - STAGING
 # =========================
-- stage: Staging
-  displayName: Deploy to STAGING
+- stage: Infra_Staging
+  displayName: Deploy Infrastructure (STAGING)
   dependsOn: Dev
 
   jobs:
+  - job: DeployInfraStaging
+    steps:
+
+    - task: AzureCLI@2
+      displayName: Deploy STAGING Infrastructure (Bicep)
+      inputs:
+        azureSubscription: 'AZURE-SERVICE-CONNECTION'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az deployment group create \
+            --resource-group minieshop-staging-rg \
+            --template-file src/Storefront/infra/bicep/storefront.bicep \
+            --parameters @src/Storefront/infra/bicep/staging.parameters.json
+
+
+# =========================
+# STAGING DEPLOYMENT
+# =========================
+- stage: Staging
+  displayName: Deploy to STAGING
+  dependsOn: Infra_Staging
+
+  jobs:
   - deployment: DeployStaging
-    environment: 'storefront-staging'   # add approval in Azure DevOps UI
+    environment: 'storefront-staging'
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -156,22 +166,9 @@ stages:
         deploy:
           steps:
 
-          # -----------------------------------
-          # Download artifact
-          # -----------------------------------
           - download: current
             artifact: drop
 
-          # -----------------------------------
-          # Extract artifact
-          # -----------------------------------
-          - script: |
-              unzip $(Pipeline.Workspace)/drop/storefront.zip -d app
-            displayName: Extract artifact
-
-          # -----------------------------------
-          # Deploy to staging
-          # -----------------------------------
           - task: AzureCLI@2
             displayName: Deploy to Staging
             inputs:
@@ -180,13 +177,11 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 az webapp deploy \
-                  --name storefront-staging \
-                  --resource-group <YOUR-RG> \
-                  --src-path app
+                  --name minieshop-storefront-staging \
+                  --resource-group minieshop-staging-rg \
+                  --src-path $(Pipeline.Workspace)/drop/Storefront.zip \
+                  --type zip
 
-          # -----------------------------------
-          # Smoke test (basic health check)
-          # -----------------------------------
           - script: |
               echo "Smoke test: checking service health"
               curl -f https://storefront-staging.azurewebsites.net/health
@@ -194,15 +189,39 @@ stages:
 
 
 # =========================
-# PRODUCTION DEPLOYMENT (MANUAL APPROVAL REQUIRED)
+# INFRA - PRODUCTION
 # =========================
-- stage: Production
-  displayName: Deploy to PRODUCTION
+- stage: Infra_Production
+  displayName: Deploy Infrastructure (PRODUCTION)
   dependsOn: Staging
 
   jobs:
+  - job: DeployInfraProd
+    steps:
+
+    - task: AzureCLI@2
+      displayName: Deploy PRODUCTION Infrastructure (Bicep)
+      inputs:
+        azureSubscription: 'AZURE-SERVICE-CONNECTION'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az deployment group create \
+            --resource-group minieshop-prod-rg \
+            --template-file src/Storefront/infra/bicep/storefront.bicep \
+            --parameters @src/Storefront/infra/bicep/prod.parameters.json
+
+
+# =========================
+# PRODUCTION DEPLOYMENT
+# =========================
+- stage: Production
+  displayName: Deploy to PRODUCTION
+  dependsOn: Infra_Production
+
+  jobs:
   - deployment: DeployProd
-    environment: 'storefront-prod'   # MUST configure approval in Azure DevOps UI
+    environment: 'storefront-prod'
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -211,22 +230,9 @@ stages:
         deploy:
           steps:
 
-          # -----------------------------------
-          # Download artifact
-          # -----------------------------------
           - download: current
             artifact: drop
 
-          # -----------------------------------
-          # Extract artifact
-          # -----------------------------------
-          - script: |
-              unzip $(Pipeline.Workspace)/drop/storefront.zip -d app
-            displayName: Extract artifact
-
-          # -----------------------------------
-          # Deploy to production
-          # -----------------------------------
           - task: AzureCLI@2
             displayName: Deploy to Production
             inputs:
@@ -235,6 +241,7 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 az webapp deploy \
-                  --name storefront-prod \
-                  --resource-group <YOUR-RG> \
-                  --src-path app
+                  --name minieshop-storefront-prod \
+                  --resource-group minieshop-prod-rg \
+                  --src-path $(Pipeline.Workspace)/drop/Storefront.zip \
+                  --type zip
