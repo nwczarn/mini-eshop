@@ -1,0 +1,6 @@
+{
+  "parameters": {
+    "appName": { "value": "minieshop-storefront-staging" },
+    "environment": { "value": "Staging" }
+  }
+}
