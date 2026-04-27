@@ -18,14 +18,14 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
   properties: {
     serverFarmId: plan.id
     httpsOnly: true
-  }
 
-  siteConfig: {
-    appSettings: [
-      {
-        name: 'ASPNETCORE_ENVIRONMENT'
-        value: environment
-      }
-    ]
+    siteConfig: {
+      appSettings: [
+        {
+          name: 'ASPNETCORE_ENVIRONMENT'
+          value: environment
+        }
+      ]
+    }
   }
 }
