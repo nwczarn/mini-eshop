@@ -89,10 +89,11 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
-                az webapp deployment source config-zip \
+                az webapp deploy \
                   --name minieshop-storefront-dev \
                   --resource-group minieshop-dev-rg \
-                  --src $(Pipeline.Workspace)/drop/Storefront.zip
+                  --src-path $(Pipeline.Workspace)/drop/Storefront.zip \
+                  --type zip
 
           - script: |
               echo "Running integration tests..."
@@ -127,10 +128,11 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
-                az webapp deployment source config-zip \
+                az webapp deploy \
                   --name minieshop-storefront-staging \
                   --resource-group minieshop-staging-rg \
-                  --src $(Pipeline.Workspace)/drop/Storefront.zip
+                  --src-path $(Pipeline.Workspace)/drop/Storefront.zip \
+                  --type zip
 
           - script: |
               echo "Smoke test: checking service health"
@@ -166,7 +168,8 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
-                az webapp deployment source config-zip \
+                az webapp deploy \
                   --name minieshop-storefront-prod \
                   --resource-group minieshop-prod-rg \
-                  --src $(Pipeline.Workspace)/drop/Storefront.zip
+                  --src-path $(Pipeline.Workspace)/drop/Storefront.zip \
+                  --type zip
