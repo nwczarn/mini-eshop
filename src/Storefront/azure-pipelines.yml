@@ -4,7 +4,7 @@ trigger:
       - dev
   paths:
     include:
-      - src/storefront/*   # only runs when Storefront changes
+      - src/Storefront/*   # only runs when Storefront changes
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -37,28 +37,28 @@ stages:
     # -----------------------------------
     # Restore dependencies (Storefront only)
     # -----------------------------------
-    - script: dotnet restore src/storefront/storefront.csproj
+    - script: dotnet restore src/Storefront/Storefront.csproj
       displayName: Restore dependencies
 
     # -----------------------------------
     # Build Storefront project only
     # -----------------------------------
-    - script: dotnet build src/storefront/storefront.csproj --configuration $(buildConfiguration) --no-restore
+    - script: dotnet build src/Storefront/Storefront.csproj --configuration $(buildConfiguration) --no-restore
       displayName: Build project
 
     # -----------------------------------
     # Run unit tests (assumed to exist)
     # -----------------------------------
-    - script: dotnet test src/storefront/storefront.csproj --configuration $(buildConfiguration) --no-build
+    - script: dotnet test src/Storefront/Storefront.csproj --configuration $(buildConfiguration) --no-build
       displayName: Run unit tests
 
     # -----------------------------------
     # Publish compiled output to folder
     # -----------------------------------
     - script: |
-        dotnet publish src/storefront/storefront.csproj \
+        dotnet publish src/Storefront/Storefront.csproj \
           -c $(buildConfiguration) \
-          -o $(Build.ArtifactStagingDirectory)/storefront
+          -o $(Build.ArtifactStagingDirectory)/Storefront
       displayName: Publish application
 
     # -----------------------------------
@@ -66,10 +66,10 @@ stages:
     # -----------------------------------
     - task: ArchiveFiles@2
       inputs:
-        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/storefront'
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/Storefront'
         includeRootFolder: false
         archiveType: zip
-        archiveFile: '$(Build.ArtifactStagingDirectory)/storefront.zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/Storefront.zip'
       displayName: Zip artifact
 
     # -----------------------------------
@@ -77,7 +77,7 @@ stages:
     # -----------------------------------
     - task: PublishBuildArtifacts@1
       inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)/storefront.zip'
+        pathToPublish: '$(Build.ArtifactStagingDirectory)/Storefront.zip'
         artifactName: 'drop'
       displayName: Publish artifact
 
@@ -110,7 +110,7 @@ stages:
           # Extract artifact
           # -----------------------------------
           - script: |
-              unzip $(Pipeline.Workspace)/drop/storefront.zip -d app
+              unzip $(Pipeline.Workspace)/drop/Storefront.zip -d app
             displayName: Extract artifact
 
           # -----------------------------------
@@ -166,7 +166,7 @@ stages:
           # Extract artifact
           # -----------------------------------
           - script: |
-              unzip $(Pipeline.Workspace)/drop/storefront.zip -d app
+              unzip $(Pipeline.Workspace)/drop/Storefront.zip -d app
             displayName: Extract artifact
 
           # -----------------------------------
@@ -221,7 +221,7 @@ stages:
           # Extract artifact
           # -----------------------------------
           - script: |
-              unzip $(Pipeline.Workspace)/drop/storefront.zip -d app
+              unzip $(Pipeline.Workspace)/drop/Storefront.zip -d app
             displayName: Extract artifact
 
           # -----------------------------------
