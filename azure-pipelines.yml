@@ -42,12 +42,13 @@ stages:
   jobs:
   - deployment: DeployWeb
     environment: 'dev'
+    pool:
+      vmImage: ubuntu-latest
     strategy:
       runOnce:
         deploy:
           steps:
-
-          - task: AzureWebApp@2
+          - task: AzureWebApp@1
             inputs:
               azureSubscription: 'AZURE-SERVICE-CONNECTION'
               appName: 'minieshop-storefront-dev'
