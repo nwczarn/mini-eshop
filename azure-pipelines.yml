@@ -47,7 +47,7 @@ stages:
         deploy:
           steps:
 
-          - task: AzureWebApp@1
+          - task: AzureWebApp@2
             inputs:
               azureSubscription: 'AZURE-SERVICE-CONNECTION'
               appName: 'minieshop-storefront-dev'
