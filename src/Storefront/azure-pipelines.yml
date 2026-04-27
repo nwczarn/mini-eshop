@@ -124,8 +124,8 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 az webapp deploy \
-                  --name storefront-dev \
-                  --resource-group <YOUR-RG> \
+                  --name minieshop-storefront-dev \
+                  --resource-group minieshop-dev-rg \
                   --src-path app
 
           # -----------------------------------
@@ -180,8 +180,8 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 az webapp deploy \
-                  --name storefront-staging \
-                  --resource-group <YOUR-RG> \
+                  --name minieshop-storefront-staging \
+                  --resource-group minieshop-staging-rg \
                   --src-path app
 
           # -----------------------------------
@@ -235,6 +235,6 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 az webapp deploy \
-                  --name storefront-prod \
-                  --resource-group <YOUR-RG> \
+                  --name minieshop-storefront-prod \
+                  --resource-group minieshop-prod-rg \
                   --src-path app
