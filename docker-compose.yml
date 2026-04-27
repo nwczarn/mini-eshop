@@ -1,15 +1,29 @@
+# Docker Compose configuration file for the Mini eShop application
+# This file defines the base configuration for all services in the application
+
+# Define all services/containers that make up the application
 services:
+  # Storefront service: The customer-facing web application
   storefront:
+    # Build the Docker image from the Storefront project directory
     build: ./src/Storefront
+    # Map port 8080 on the host machine to port 8080 in the container
+    # Format: "host_port:container_port"
     ports:
       - "8080:8080"
 
+  # Admin service: The administrative interface for managing the e-shop
   admin:
+    # Build the Docker image from the Admin project directory
     build: ./src/Admin
+    # Expose the admin service on port 8081 of the host machine
     ports:
       - "8081:8081"
 
+  # AIService: Provides AI-powered functionality (likely chatbot or recommendations)
   aiservice:
+    # Build the Docker image from the AIService project directory
     build: ./src/AIService
+    # Expose the AI service on port 8090 of the host machine
     ports:
       - "8090:8090"
